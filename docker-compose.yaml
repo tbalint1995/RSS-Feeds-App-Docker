@@ -1,0 +1,52 @@
+version: '3.8'
+services:
+    main:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        command: php artisan serve --host=0.0.0.0 -vvv
+        ports:
+            - 8000:8000
+        environment:
+            DB_HOST: mysql
+            DB_DATABASE: laravel
+            DB_USERNAME: root
+            DB_PASSWORD: root
+            APP_ENV: local
+            APP_DEBUG: true
+        depends_on:
+            mysql:
+                condition: service_healthy
+        healthcheck:
+           test: ["CMD", "php", "artisan", "migrate"]
+           timeout: 5s
+           retries: 50
+    cron:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        command: ["/run-cron.sh"]
+        restart: always
+        environment:
+            DB_HOST: mysql
+            DB_DATABASE: laravel
+            DB_USERNAME: root
+            DB_PASSWORD: root
+            APP_ENV: local
+            APP_DEBUG: true
+        depends_on:
+            mysql:
+                condition: service_healthy
+            main:
+                condition: service_healthy
+    mysql:
+        image: mysql
+        environment:
+           MYSQL_ROOT_PASSWORD: root
+           MYSQL_DATABASE: laravel
+        healthcheck:
+           test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+           timeout: 1s
+           retries: 50
+
+
