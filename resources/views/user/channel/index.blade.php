@@ -6,7 +6,7 @@
     
 @section('content')
 
-    @include('parts.refreshall-button');
+    @include('parts.refreshall-button')
 
     @include('parts.add-button', [
         'url'=>route('user.channel.add')
